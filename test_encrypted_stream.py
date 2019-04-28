@@ -1,6 +1,7 @@
 import pytest
 import logging
 import tempfile
+import io
 
 # apparently, the python standard library does not offer a
 # convenient function to generate a sequence of pseudo-random bytes
@@ -17,6 +18,26 @@ from encrypted_stream import (
     BLOCKSIZE_v1,
     OUTPUT_BLOCKSIZE_v1,
 )
+
+
+@pytest.fixture
+def sequential_check_increments():
+    # TODO: check that we land on the header/block 0 boundary
+    # TODO: maybe land on a later block boundary as well
+    # TODO: maybe add some more zero increments, just for fun
+    def generate():
+        yield 2  # make sure that the first few positions are inside the header
+        yield 0
+        yield 10
+        yield 12  # this should land us directly at the end of the header
+        yield 1071  # go a bit into the first block
+        yield 2 ** 18 + 11  # go a bit further, but stay in the first block
+        yield 2 * 2 ** 20 + 1071  # do a big operation across two block boundaries
+
+        while True:
+            yield OUTPUT_BLOCKSIZE_v1 + 1
+
+    return generate()
 
 
 @pytest.fixture(
@@ -50,6 +71,18 @@ def source_buffer(request):
         f.write(random_data)
 
         yield f
+
+
+@pytest.fixture(scope="module")
+def encrypted_bytes(source_buffer, key):
+
+    reader = EncryptingReader(source_buffer, key)
+    output = bytearray(reader.output_size)
+    bytes_read = reader.readinto(output)
+    assert bytes_read == len(output)
+    reader.close()
+
+    return output
 
 
 @pytest.fixture(scope="session")
@@ -237,3 +270,52 @@ def test_encryption_decryption_roundtrip(source_buffer, key):
 
         assert source_bytes == comparison_bytes
 
+
+def test_tell_with_sequential_writes(encrypted_bytes, key, sequential_check_increments):
+
+    with tempfile.TemporaryFile() as f:
+        writer = DecryptingWriter(f, key)
+
+        position = 0
+        for inc in sequential_check_increments:
+            writer.write(encrypted_bytes[position : position + inc])
+            position += inc
+            assert min(position, len(encrypted_bytes)) == writer.tell()
+
+            if writer.stream_complete:
+                break
+
+            if position > len(encrypted_bytes):
+                writer.end_stream()
+                break
+
+
+def test_consistency_with_sequential_writes(source_buffer, encrypted_bytes, key, sequential_check_increments):
+
+    source_size = source_buffer.seek(0, io.SEEK_END)
+    source_buffer.seek(0)
+    comparison = source_buffer.read(source_size)
+
+    with tempfile.TemporaryFile() as f:
+        writer = DecryptingWriter(f, key)
+
+        position = 0
+        for inc in sequential_check_increments:
+            writer.write(encrypted_bytes[position : position + inc])
+            position += inc
+
+            if writer.stream_complete:
+                break
+
+            if position > len(encrypted_bytes):
+                writer.end_stream()
+                break
+
+        writer.close()
+
+        length = f.tell()
+        f.seek(0)
+        output = f.read(length)
+
+        assert comparison == output
+    

@@ -340,6 +340,8 @@ class DecryptingWriter(io.RawIOBase):
     def write_block(self, block, known_to_be_last=False):
 
         self._checkClosed()
+        # the header needs to have been decoded before this function can be called
+        assert self.file_nonce is not None
 
         sink_position = self.sink.tell()
         assert (sink_position % BLOCKSIZE_v1) == 0
@@ -457,4 +459,20 @@ class DecryptingWriter(io.RawIOBase):
         return False
 
     def tell(self):
-        pass
+        sink_position = self.sink.tell()
+        assert (sink_position % BLOCKSIZE_v1) == 0
+
+        if self.file_nonce is None:
+            # we're still in the header
+            return len(self.cache)
+
+        block_index = sink_position // BLOCKSIZE_v1
+
+        input_position = block_index * OUTPUT_BLOCKSIZE_v1
+        # add the header length (24 bytes)
+        # TODO: we should really pull this out into a constant somewhere
+        input_position += 24
+        # we've got these bytes cached, so they were already written to us
+        input_position += len(self.cache)
+
+        return input_position
