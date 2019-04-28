@@ -251,6 +251,9 @@ class EncryptingReader(io.RawIOBase):
         if position > self.output_size:
             position = self.output_size
 
+        if position < 0:
+            position = 0
+
         if position <= self.headersize:
             # we're still in the header
             # (or at the beginning of the first data block)

@@ -247,6 +247,42 @@ def test_consistency_with_seek_SEEK_SET(source_buffer, key, caplog):
         )
 
 
+def test_consistency_with_seek_SEEK_END(source_buffer, key, encrypted_bytes):
+
+    reader = EncryptingReader(source_buffer, key)
+    comparison = reader.read(reader.output_size)
+    assert len(comparison) == reader.output_size
+    reader.seek(0)
+
+    # subtract 1 in case the last block is full, so that we're always
+    # guaranteed to round down to the beginning of the block
+    last_block_index = (reader.output_size - 1) // OUTPUT_BLOCKSIZE_v1
+    last_block_start = last_block_index * OUTPUT_BLOCKSIZE_v1
+    last_block_length = reader.output_size - last_block_start
+
+    offsets = [
+        -1,
+        -2,
+        -1071,
+        -last_block_length + 1,
+        -last_block_length,
+        -last_block_length - 1,
+        -last_block_length - 1071,
+        -last_block_length - OUTPUT_BLOCKSIZE_v1 + 1,
+        -last_block_length - OUTPUT_BLOCKSIZE_v1,
+        -last_block_length - OUTPUT_BLOCKSIZE_v1 - 1,
+    ]
+
+    for offset in offsets:
+        reader.seek(offset, io.SEEK_END)
+        # read to the end
+        output = reader.read(-offset)
+        assert reader.tell() == reader.output_size
+
+        # since offset is negative, we'll use python's built-in backward indexing to check
+        assert comparison[offset:] == output
+
+
 def test_encryption_decryption_roundtrip(source_buffer, key):
 
     reader = EncryptingReader(source_buffer, key)
@@ -290,7 +326,9 @@ def test_tell_with_sequential_writes(encrypted_bytes, key, sequential_check_incr
                 break
 
 
-def test_consistency_with_sequential_writes(source_buffer, encrypted_bytes, key, sequential_check_increments):
+def test_consistency_with_sequential_writes(
+    source_buffer, encrypted_bytes, key, sequential_check_increments
+):
 
     source_size = source_buffer.seek(0, io.SEEK_END)
     source_buffer.seek(0)
@@ -318,4 +356,3 @@ def test_consistency_with_sequential_writes(source_buffer, encrypted_bytes, key,
         output = f.read(length)
 
         assert comparison == output
-    
