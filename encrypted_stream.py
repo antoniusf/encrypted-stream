@@ -3,11 +3,12 @@ import struct
 import io
 from math import floor
 
-BLOCKSIZE_v1 = 2**20
+BLOCKSIZE_v1 = 2 ** 20
 # output blocks always have the extra macbytes
 OUTPUT_BLOCKSIZE_v1 = BLOCKSIZE_v1 + nacl.secret.SecretBox.MACBYTES
 
-class EncryptingReader (io.RawIOBase):
+
+class EncryptingReader(io.RawIOBase):
     """File-like object that provides a transparently encrypted view
     over another stream
     """
@@ -84,7 +85,7 @@ class EncryptingReader (io.RawIOBase):
         #   for the final block marker, that's why we it doesn't say
         #   2**32 here.)
         #  TODO: maybe make this an assert, no one should ever run into this
-        if (block_index + 1) >= 2**31:
+        if (block_index + 1) >= 2 ** 31:
             raise ValueError("Stream too large; maximum block index surpassed")
 
         counter = block_index + 1
@@ -129,14 +130,14 @@ class EncryptingReader (io.RawIOBase):
             return length
 
         # if we can't, we'll first empty our remaining block, ...
-        b[:len(self.remaining_block)] = self.remaining_block[:]
+        b[: len(self.remaining_block)] = self.remaining_block[:]
         bytes_written += len(self.remaining_block)
         self.remaining_block = bytes()
 
         # ... and then keep pushing blocks until the buffer is full.
         # (or until we run out of source data to read)
         while True:
-            
+
             block = self.get_next_block()
 
             # is this block enough to fill the buffer?
@@ -152,7 +153,7 @@ class EncryptingReader (io.RawIOBase):
                 break
 
             else:
-                b[bytes_written:bytes_written + len(block)] = block[:]
+                b[bytes_written : bytes_written + len(block)] = block[:]
                 bytes_written += len(block)
 
                 if self.at_source_end:
@@ -169,9 +170,9 @@ class EncryptingReader (io.RawIOBase):
 
         if source_position == 0:
             # we're still in the header
-            return (self.headersize - len(self.remaining_block))
+            return self.headersize - len(self.remaining_block)
 
-        elif source_position == self.source_size: # aka at_source_end
+        elif source_position == self.source_size:  # aka at_source_end
             # we want the index of the last block
             # the integer divide will automatically round down to the
             # beginning of the last block, except if the last block
@@ -227,7 +228,7 @@ class EncryptingReader (io.RawIOBase):
             base_point = self.output_size
 
         position = base_point + offset
-        del(base_point)
+        del base_point
 
         # clamp the position
         # this needs to happen before we check if we're still
@@ -241,7 +242,7 @@ class EncryptingReader (io.RawIOBase):
             # (or at the beginning of the first data block)
             # so the source needs to be at position 0
             self.source.seek(0)
-            
+
             header = self.get_header()
             self.remaining_block = header[position:]
 
@@ -254,7 +255,7 @@ class EncryptingReader (io.RawIOBase):
         #  position == self.headersize, we now have
         #  position >= 1)
         position -= self.headersize
-        
+
         # compute the block index (this is similar to comparable
         #  code in tell(), so see there why we subtract 1.)
         block_index = (position - 1) // OUTPUT_BLOCKSIZE_v1
@@ -294,8 +295,7 @@ class EncryptingReader (io.RawIOBase):
         self.output_size += self.headersize
 
 
-class DecryptingWriter (io.RawIOBase):
-
+class DecryptingWriter(io.RawIOBase):
     def __init__(self, sink, key):
 
         self.sink = sink
@@ -313,7 +313,7 @@ class DecryptingWriter (io.RawIOBase):
     def decrypt_block(self, block, block_index, is_last=False):
 
         counter = block_index + 1
-        if counter >= 2**31:
+        if counter >= 2 ** 31:
             raise ValueError("Stream too large; maximum block index surpassed")
 
         if is_last:
@@ -357,7 +357,11 @@ class DecryptingWriter (io.RawIOBase):
                 self.sink.truncate(0)
                 self.close()
 
-                raise ValueError("Failed to decrypt chunk with index {}. This means that your data was either corrupted or has been tampered with. We've gotten rid of the decrypted data that was written so far and closed this stream.".format(block_index))
+                raise ValueError(
+                    "Failed to decrypt chunk with index {}. This means that your data was either corrupted or has been tampered with. We've gotten rid of the decrypted data that was written so far and closed this stream.".format(
+                        block_index
+                    )
+                )
 
             else:
                 # we've received the last block.
@@ -412,7 +416,7 @@ class DecryptingWriter (io.RawIOBase):
 
         if self.file_nonce is None:
             # we're still in the header
-            if len(self.cache) >= 24: # 4 byte version + 20 byte nonce
+            if len(self.cache) >= 24:  # 4 byte version + 20 byte nonce
                 version_major, version_minor = struct.unpack("<HH", self.cache[:4])
                 assert version_major == 1
                 assert version_minor == 0
