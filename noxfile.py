@@ -25,6 +25,7 @@ def black(session):
         "noxfile.py",
     )
 
+
 @nox.session(reuse_venv=True)
 def docs(session):
 

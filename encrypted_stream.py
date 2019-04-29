@@ -24,17 +24,26 @@ OUTPUT_BLOCKSIZE_v1 = BLOCKSIZE_v1 + nacl.secret.SecretBox.MACBYTES
 
 class EncryptingReader(io.RawIOBase):
     """File-like object that provides a transparently encrypted view
-    over another stream
+    over another stream.
+
+    .. important:: :class:`EncryptingReader` has a few expectations regarding the source stream:
+
+        - it needs to be seekable
+        - it must have a definite and fixed length
+        - while the reader is active (not closed), it requires exclusive access to the
+          source stream, since the cursor position of the source is used as part of the internal state. Doing seeks, reads, writes, or anything else that will move the source stream's cursor 
+          active will likely result in unexpected exceptions (if you're lucky), or corrupt the output stream silently. Additionally, rewriting parts of the source stream -- even if you reset the cursor -- may result in a breakdown of the cryptographic security guarantees provided by this module, if you continue to use the reader afterwards.       
+
+    :param source: The file-like object you want to encrypt. See above for required properties.
+    :param key: The key used for encryption, must be a ``bytes`` object of length 32. Generate or derive this key in a secure way.
     """
 
+    # TODO: export nacl key-gen function
+    # TODO: add security admonitions for key, nonce (when flexible nonce is added), and re-iterate no-writes on the source stream
+    # TODO: add documentation for RawIOBase inherited methods read, readall
+    # TODO: call RawIOBase constructor in our constructor? I don't know what that would do, but it might be a good idea
+
     def __init__(self, source, key):
-        """Note: EncryptingReader expects exclusive access to the
-        source stream. Doing `seek` on the source while the reader is
-        active will break things in interesting and hard to detect
-        ways, so please don't do it. While we could detect things like
-        this, doing so would incur extra overhead which shouldn't be
-        necessary.
-        """
 
         self.source = source
 
@@ -313,6 +322,12 @@ class EncryptingReader(io.RawIOBase):
 
 
 class DecryptingWriter(io.RawIOBase):
+    """File-like object that transparently decrypts incoming data into an underlying buffer.
+
+    :param sink: The file-like object into which data will be decrypted
+    :param key: The key used for decryption
+    """
+
     def __init__(self, sink, key):
 
         self.sink = sink
@@ -393,7 +408,7 @@ class DecryptingWriter(io.RawIOBase):
         return self.stream_complete
 
     def end_stream(self):
-        """Call this when you've reached the end of the encrypted source stream. It will ensure that the data you've received is complete and that everything is written to the sink stream, and then close the DecryptingWriter."""
+        """Call this when you've reached the end of the encrypted source stream. It will ensure that the data you've received is complete and that everything is written to the sink stream, and then close the writer."""
 
         try:
             if len(self.cache) > 0:
@@ -406,8 +421,8 @@ class DecryptingWriter(io.RawIOBase):
             self.close()
 
     def close(self):
-        """Close the DecryptingWriter. Note that this does not close
-        the underlying stream, so you'll have to do that yourself."""
+        """Close the writer. Note that this does not close
+        the underlying stream, so you'll have to do that yourself. This allows you to close the stream even if you haven't reached the end, in case you want to pick up where you left of later. If you did reach the end, don't forget to call :py:meth:`end_stream` before you call this method."""
 
         if not self.__closed:
 
