@@ -22,7 +22,7 @@ copyright = '2019, Antonius Frie'
 author = 'Antonius Frie'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '0.1a'
 
 
 # -- General configuration ---------------------------------------------------
