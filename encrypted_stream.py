@@ -74,7 +74,7 @@ class EncryptingReader(io.RawIOBase):
 
     def get_header(self):
 
-        version_bytes = struct.pack("<HH", 1, 0)
+        version_bytes = struct.pack("<HH", 0, 1)
         header = version_bytes + self.file_nonce
         return header
 
@@ -452,8 +452,8 @@ class DecryptingWriter(io.RawIOBase):
             # we're still in the header
             if len(self.cache) >= 24:  # 4 byte version + 20 byte nonce
                 version_major, version_minor = struct.unpack("<HH", self.cache[:4])
-                assert version_major == 1
-                assert version_minor == 0
+                assert version_major == 0
+                assert version_minor == 1
 
                 self.file_nonce = self.cache[4:24]
                 self.cache = self.cache[24:]
