@@ -1,6 +1,6 @@
 import nox
 
-# All of the cool stuff in here (like black and flake8) comes from nox's own noxfile
+# All of the cool stuff in here (like black and flake8, and the sphinx setup) is based on nox's own noxfile
 
 
 @nox.session
@@ -24,3 +24,11 @@ def black(session):
         "setup.py",
         "noxfile.py",
     )
+
+@nox.session(reuse_venv=True)
+def docs(session):
+
+    session.install("sphinx")
+
+    session.cd("docs")
+    session.run(*("sphinx-build -b html . _build/html".split(" ")))
