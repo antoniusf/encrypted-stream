@@ -8,3 +8,8 @@ install:
 
 script:
   - pytest
+
+branches:
+  only:
+    -master
+    

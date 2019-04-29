@@ -1,6 +1,6 @@
 # `encrypted-stream`
 
-[![Documentation Status](https://readthedocs.org/projects/encrypted-stream/badge/?version=latest)](https://encrypted-stream.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/encrypted-stream/badge/?version=latest)](https://encrypted-stream.readthedocs.io/en/latest/?badge=latest) [![Build Status](https://travis-ci.org/antoniusf/encrypted-stream.svg?branch=master)](https://travis-ci.org/antoniusf/encrypted-stream)
 
 **Warning:** This is still very much work in progress and you probably shouldn't use it yet.
 
