@@ -34,4 +34,5 @@ Contents
    :maxdepth: 2
 
    api
+   security
 

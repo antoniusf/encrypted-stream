@@ -5,17 +5,9 @@
   - write documentation on the file format and explain design choices
   - review the explanatory comments and code for understandability
 
-- file format: add a 4-byte (or smth) block-wise nonce to protect against re-writing misuse
-  - 4 bytes is really *really* not enough for a nonce, but if it's only meant to protect from a case that shouldn't happen anyways, maybe that's ok?
-  - since we can't cache, we'd have to compute the nonce from the data
-  - what i dislike about this is that it's a really kinda half-baked solution
-  - i also don't want to use more than 4 bytes for this feature since we're trading these off for the length (and security) of the file nonce...
-  - can we extend the XSalsa20 nonce further?
-    - this is icky too because it's going way too much in the direction of "rolling your own crypto"
-    - might negatively affect security of the overall system
-  - im *reaaaally* tempted by threefish's long block sizes right now
-    - also not a nice solution, b/c a) threefish is not as well analyzed as either aes or salsa
-    - and b) we'd still have to go to uncomfortably low levels of crypto (manually doing message authentication etc.)
+- protection against re-writing misuse:
+  - I think we should just go for a nonce-misuse resistant encryption scheme; this is the most obvious and least hacky approach. `miscreant` offers an implementation of AES-SIV in python, and it even implements the STREAM construction, which would mean that I don't have to touch crypto code at all 🎉
+    (maybe not though, since miscreant's base implementation does not support seeking, so I might have to manually set the counters in there or something. Point of dislike for this approach: We'd have some coupled state to keep in sync (source file pos + miscreant encryptor counter), which I don't like because I feel that it introduces unnecessary complexity and potential for state mismatch problems.
 
 - close source streams when the views are closed? This would make the context manager function really useful, so you could just write
 

@@ -32,4 +32,5 @@ def docs(session):
     session.install("sphinx")
 
     session.cd("docs")
+    session.run("rm", "-r", "_build", external=True)
     session.run(*("sphinx-build -b html . _build/html".split(" ")))
