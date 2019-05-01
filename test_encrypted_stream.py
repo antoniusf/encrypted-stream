@@ -356,3 +356,81 @@ def test_consistency_with_sequential_writes(
         output = f.read(length)
 
         assert comparison == output
+
+
+# this returns the blocks separately, because it is important to ensure that the reordering tests actually swap whole blocks. otherwise, decryption fails trivially because the ciphertext is just broken.
+@pytest.fixture(scope="module")
+def three_encrypted_blocks(key):
+
+    with tempfile.TemporaryFile() as f:
+
+        random_data = numpy.random.bytes(3 * BLOCKSIZE_v1)
+        f.write(random_data)
+
+        reader = EncryptingReader(f, key)
+        header = reader.read(24)
+        # make sure that we are on a block boundary:
+        # remaining_block should be empty
+        assert len(reader.remaining_block) == 0
+
+        first_block = reader.read(OUTPUT_BLOCKSIZE_v1)
+        assert len(reader.remaining_block) == 0
+
+        second_block = reader.read(OUTPUT_BLOCKSIZE_v1)
+        assert len(reader.remaining_block) == 0
+
+        third_block = reader.read(OUTPUT_BLOCKSIZE_v1)
+        assert len(reader.remaining_block) == 0
+
+    return (header, first_block, second_block, third_block)
+
+
+def test_decryption_fail_truncation(three_encrypted_blocks, key):
+
+    header, first_block, second_block, third_block = three_encrypted_blocks
+
+    with tempfile.TemporaryFile() as f:
+
+        writer = DecryptingWriter(f, key)
+
+        writer.write(header)
+        writer.write(first_block)
+
+        # TODO: make a more specific exception class
+        with pytest.raises(ValueError):
+            writer.end_stream()
+
+
+def test_decryption_fail_advanced_truncation(three_encrypted_blocks, key):
+    """Some intermediary blocks are missing, but the final block is still present"""
+
+    header, first_block, second_block, third_block = three_encrypted_blocks
+
+    with tempfile.TemporaryFile() as f:
+
+        writer = DecryptingWriter(f, key)
+
+        writer.write(header)
+        writer.write(first_block)
+
+        with pytest.raises(ValueError):
+            writer.write(third_block)
+            writer.end_stream()
+
+
+# we'll only want to test one specific message length here, because we can only re-order with more than 3 blocks. using the parametrized fixture for this would be wasteful, though it _would_ be nice if we could reuse that code.
+def test_decryption_fail_reordering(three_encrypted_blocks, key):
+
+    header, first_block, second_block, third_block = three_encrypted_blocks
+
+    with tempfile.TemporaryFile() as f:
+
+        writer = DecryptingWriter(f, key)
+
+        writer.write(header)
+
+        with pytest.raises(ValueError):
+            writer.write(second_block)
+            writer.write(first_block)
+            writer.write(third_block)
+            writer.end_stream()

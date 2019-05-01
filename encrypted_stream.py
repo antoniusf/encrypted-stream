@@ -387,10 +387,8 @@ class DecryptingWriter(io.RawIOBase):
                 data = self.decrypt_block(block, block_index, is_last=True)
             except nacl.exceptions.CryptoError:
                 # something is wrong with the message
-                self.sink.seek(0)
-                self.sink.truncate(0)
-                self.close()
 
+                self.decryption_fail()
                 raise ValueError(
                     "Failed to decrypt chunk with index {}. This means that your data was either corrupted or has been tampered with. We've gotten rid of the decrypted data that was written so far and closed this stream.".format(
                         block_index
@@ -407,15 +405,28 @@ class DecryptingWriter(io.RawIOBase):
 
         return self.stream_complete
 
+    def decryption_fail(self):
+
+        self.sink.seek(0)
+        self.sink.truncate(0)
+        self.close()
+
     def end_stream(self):
         """Call this when you've reached the end of the encrypted source stream. It will ensure that the data you've received is complete and that everything is written to the sink stream, and then close the writer."""
 
         try:
-            if len(self.cache) > 0:
-                # decrypt the last block
-                data = self.cache
-                self.cache = bytes()
-                self.write_block(data, known_to_be_last=True)
+            if not self.stream_complete:
+
+                if len(self.cache) > 0:
+                    # decrypt the last block
+                    data = self.cache
+                    self.cache = bytes()
+                    self.write_block(data, known_to_be_last=True)
+
+                # the stream _has_ to be complete now, otherwise something is missing.
+                if not self.stream_complete
+                    self.decryption_fail()
+                    raise ValueError("stream incomplete")
 
         finally:
             self.close()
