@@ -51,8 +51,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'alabaster'
 
 html_theme_options = {
-#    "logo": "logo.png",
+    "logo": "logo.png",
 #    "logo_name": True,
+    "head_font_family": "'Kalam', Arial",
+    "font_family": "'Montserrat', Arial"
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
