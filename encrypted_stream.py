@@ -424,7 +424,7 @@ class DecryptingWriter(io.RawIOBase):
                     self.write_block(data, known_to_be_last=True)
 
                 # the stream _has_ to be complete now, otherwise something is missing.
-                if not self.stream_complete
+                if not self.stream_complete:
                     self.decryption_fail()
                     raise ValueError("stream incomplete")
 
