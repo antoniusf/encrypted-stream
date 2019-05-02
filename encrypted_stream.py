@@ -105,11 +105,9 @@ class EncryptingReader(io.RawIOBase):
         # construct the nonce
         #  the nonce construction puts a maximum on the block index
         #  (remember that the MSB of the nonce counter is reserved
-        #   for the final block marker, that's why we it doesn't say
+        #   for the final block marker, that's why it doesn't say
         #   2**32 here.)
-        #  TODO: maybe make this an assert, no one should ever run into this
-        if (block_index + 1) >= 2 ** 31:
-            raise ValueError("Stream too large; maximum block index surpassed")
+        assert (block_index + 1) < 2 ** 31
 
         counter = block_index + 1
         # make sure that the flag bit is zero
@@ -345,8 +343,7 @@ class DecryptingWriter(io.RawIOBase):
     def decrypt_block(self, block, block_index, is_last=False):
 
         counter = block_index + 1
-        if counter >= 2 ** 31:
-            raise ValueError("Stream too large; maximum block index surpassed")
+        assert counter < 2 ** 31
 
         if is_last:
             counter |= 1 << 31
