@@ -434,3 +434,26 @@ def test_decryption_fail_reordering(three_encrypted_blocks, key):
             writer.write(first_block)
             writer.write(third_block)
             writer.end_stream()
+
+
+def test_reader_attributes(key):
+
+    with tempfile.TemporaryFile() as f:
+
+        # 0-length files are unsupported...
+        f.write(bytes(1))
+        reader = EncryptingReader(f, key)
+
+        assert reader.readable() == True
+        assert reader.seekable() == True
+        assert reader.writable() == False
+
+
+def test_writer_attributes(key):
+
+    with tempfile.TemporaryFile() as f:
+        writer = DecryptingWriter(f, key)
+
+        assert writer.readable() == False
+        assert writer.seekable() == False
+        assert writer.writable() == True
