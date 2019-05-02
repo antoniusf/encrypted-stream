@@ -43,7 +43,7 @@
        x2="217.07942"
        y2="487.48563"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-55.54707,-40.37596)" />
+       gradientTransform="translate(-55.54715,-40.375957)" />
     <filter
        style="color-interpolation-filters:sRGB"
        id="filter6068"
@@ -140,6 +140,19 @@
          stdDeviation="2.1629111"
          id="feGaussianBlur8675" />
     </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter1211"
+       x="-0.20325351"
+       width="1.406507"
+       y="-0.18192726"
+       height="1.3638545">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="11.039812"
+         id="feGaussianBlur1213" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -148,9 +161,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="113.68427"
-     inkscape:cy="72.491497"
+     inkscape:zoom="2.2709611"
+     inkscape:cx="135.18505"
+     inkscape:cy="127.92828"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -186,7 +199,7 @@
      id="layer1"
      transform="translate(-189.6565,-365.00574)">
     <path
-       style="opacity:1;fill:#354443;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4.69999981;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:0.886;fill:#354443;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4.69999981;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter1211)"
        d="m 247.55378,425.946 109.4643,-15.53573 18.21428,18.21429 -15.53571,124.74529 -2.67857,2.67856 H 263.08949 L 244.87521,537.83413 V 428.62456 Z"
        id="path5315"
        inkscape:connector-curvature="0"
@@ -295,7 +308,7 @@
          inkscape:connector-curvature="0"
          id="rect4717"
          d="M 139.75641,272.04437 H 233.685 l 18.21428,18.21429 V 399.46823 L 233.685,417.68251 H 139.75641 L 121.54213,399.46823 V 290.25866 Z"
-         style="opacity:1;fill:#4b8bbe;fill-opacity:1;fill-rule:nonzero;stroke:#234662;stroke-width:4.69999981;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="opacity:1;fill:#4b8bbe;fill-opacity:1;fill-rule:nonzero;stroke:#234662;stroke-width:0.8007869;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <g
          id="g4812">
         <path
