@@ -27,12 +27,38 @@ That's it! ``encrypted_file`` will behave just as if you had created a temporary
 
 There's also a matching :class:`~encrypted_stream.DecryptingWriter` that works the same way: Write encrypted data to it, and it writes the decrypted result into the file you give it.
 
+Features
+--------
+
+- built on solid crypto
+
+  - but see :doc:`security` for some important caveats to this
+
+- easy-to-use API
+- lightweight: minimal extra storage, fast ``seek()``-ing to arbitrary positions
+
+Not-yet features
+----------------
+
+- 100% test coverage (we're at 99%, so close!!)
+- hard-to-misuse
+
+  - It is currently possible, even if unlikely, to trigger nonce-reuse in the underlying primitive. There is a big warning in the :doc:`api` about this, but this doesn't really go with the definition of "hard-to-misuse". Sadly, this problem is inherent in the current API (allowing fast seeking while staying lightweight); I am planning to fix it by switching to a misuse-resistant primitive, which will have a couple of other advantages as well. (Disadvantages too, but meh... it needs to be secure first, everything else second.)
+
+Anti-features
+-------------
+
+- contains crypto implemented by a non-expert
+- project will be on ice while I'm busy with Life™
+
+
 Contents
 --------
 
 .. toctree::
    :maxdepth: 2
 
+   tutorial
    api
    security
 
