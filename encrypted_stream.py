@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import nacl.secret
+import nacl.utils
 import struct
 import io
 from math import floor
@@ -20,6 +21,12 @@ from math import floor
 BLOCKSIZE_v1 = 2 ** 20
 # output blocks always have the extra macbytes
 OUTPUT_BLOCKSIZE_v1 = BLOCKSIZE_v1 + nacl.secret.SecretBox.MACBYTES
+
+
+def generate_key():
+    """Generates a new secure random key, for use with the other classes in this module. If you're not deriving the key from some kind of other secret, this is the function you should use to make a new one."""
+
+    return nacl.utils.random(32)
 
 
 class EncryptingReader(io.RawIOBase):

@@ -16,9 +16,13 @@ This module works on file-like objects, so let's start by creating a file with s
 
 If you already have a file you'd like to encrypt, skip this step. Feel free to be more creative with the secret message than I was.
 
-Let's open the file again, for reading. Note that :class:`~encrypted_stream.EncryptingReader` expects a binary stream, so you should open the file in binary mode. Hence, ``"rb"`` instead of just ``"r"``::
+We'll also need to generate a secure random key::
 
   import encrypted_stream
+
+  key = encrypted_stream.generate_key()
+
+Let's open the file again, for reading. Note that :class:`~encrypted_stream.EncryptingReader` expects a binary stream, so you should open the file in binary mode. Hence, ``"rb"`` instead of just ``"r"``::
 
   f = open(filename, "rb")
   # TODO: keygen (I think we want to export that as a function...)

@@ -13,6 +13,7 @@ import numpy.random
 import nacl.utils
 
 from encrypted_stream import (
+    generate_key,
     EncryptingReader,
     DecryptingWriter,
     BLOCKSIZE_v1,
@@ -85,9 +86,19 @@ def encrypted_bytes(source_buffer, key):
     return output
 
 
+def test_generate_key():
+
+    key = generate_key()
+
+    # we can't actually test the randomness aspect here,
+    # so we'll just check that it has the right format
+    assert type(key) == bytes
+    assert len(key) == nacl.secret.SecretBox.KEY_SIZE
+
+
 @pytest.fixture(scope="session")
 def key():
-    return nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
+    return generate_key()
 
 
 def test_zero_length_files(key):
