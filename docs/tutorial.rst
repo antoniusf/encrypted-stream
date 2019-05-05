@@ -1,8 +1,8 @@
 Tutorial
 ========
 
-Encrypting some data
---------------------
+Encryption
+----------
 
 This module works on file-like objects, so let's start by creating a file with some secret message in it. ::
 
@@ -56,8 +56,8 @@ Finally, let's clean up. Currently, :class:`~encrypted_stream.EncryptingReader` 
   reader.close()
   f.close()
 
-Decrypting the data
--------------------
+Decryption
+----------
 
 Let's now try to get that encrypted data back into readable form! Again, we'll need a new temporary file for :class:`~encrypted_stream.DecryptingWriter` to write into. We'll use an unnamed temporary file in the tutorial, but feel free to instead write this into a file of your choice with ``open()``. Remember to use binary mode! ::
 
