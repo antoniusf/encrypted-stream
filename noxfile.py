@@ -12,7 +12,7 @@ def test(session):
     session.run("pytest")
 
 
-@nox.session(py="3.6")
+@nox.session
 def black(session):
 
     session.install("black")

@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="encrypted-stream",
-    version="0.1a",
+    version="0.1a1",
     description="Transparent encryption and decryption for file-like objects",
     long_description=long_description,
     long_description_content_type="text/markdown",
