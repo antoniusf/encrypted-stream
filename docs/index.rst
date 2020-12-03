@@ -6,59 +6,24 @@
 encrypted-stream
 ================
 
-*transparent encryption and decryption for file-like objects*
+Hey. I'm sorry if you're looking for the documenation of the encrypted-stream package. It's no longer here. (Though it's still available as an older version if you really need it.)
 
-.. warning:: This is a very early release! Some parts of the code are not tested yet, some are in need of improvement. The documetation is incomplete. There may be cryptographically relevant bugs. Things may break without warning!
+I wrote encrypted-stream as a personal project, to encrypt my backups before uploading them to cloud storage, and I pulled all the crypto stuff out into a separate package. The idea was to make everything neat and tidy and well-tested, and I wanted to learn how to make a proper python package.
 
-Say you want to upload a file somewhere, but you'd like to encrypt it beforehand.
+Implementing your own crypto is traditionally a difficult subject, and there are good reasons for this. It's very easy to make mistakes that make the encryption scheme insecure without breaking things in a noticeable way. I did it anyway, since I couldn't find a pre-existing implementation fulfilling my requirements. I took precautions to limit the level of risk I would incur, and decided that the result was acceptable for my purposes.
 
-To do this, you could encrypt the entire file at once. You'll need a temporary file to hold the encrypted data, and it needs to be at least as big as your original file. For large files, this would use a lot of extra disk space.
+And then, after surveying the existing implementations with the same API, and seeing the mistakes they had made, I decided that I couldn't possibly make things worse by publishing mine. I put on some warnings (which, in retrospect, could have been worded more strongly), and expected literally no one to use it. (And, luckily, not many people did.)
 
-If you don't want to fit the entire file into your RAM at once, you might also want to use a chunking encryption protocol, and you should probably make sure that your cryptographic system is secure and tamper resistant. 
+A few days ago, I dug the library back out again and realized that I was no longer comfortable with people being able to use the code that I had written. And I checked the download numbers of the package and they were higher than they should have been from only my usage, which means that other people have downloaded this code and used it. Including you, perhaps, if you're reading this. (Hi?)
 
-Or, you could just say::
+I have now pulled the release from pypi so that people won't be able to use it anymore. I'm planning to publish a placeholder version in the next few days, just to explain things, once I have figured out how to use pypi again and how best to do that. For now, this notice will have to suffice.
 
-    from encrypted_stream import EncryptingReader
+Next steps
+----------
 
-    with open("source", "rb") as source_file:
-        encrypted_file = EncryptingReader(source_file, key)
+If you encrypted data with my library and are now unable to decrypt it, please download the `last full version of the library from my github <https://github.com/antoniusf/encrypted-stream/tree/8357791c8663f8fa7f63cd83f778732e2b91a4db>`_ and install it manually. If you need support doing this, don't hesitate to contact me under antonius.frie (at) ruhr-uni-bochum.de, or on github.
 
-That's it! ``encrypted_file`` will behave just as if you had created a temporary file and stored the encrypted data inside of it, except that it uses no extra disk space and only about 1 MB of your precious RAM.
-
-There's also a matching :class:`~encrypted_stream.DecryptingWriter` that works the same way: Write encrypted data to it, and it writes the decrypted result into the file you give it.
-
-Features
---------
-
-- built on solid crypto
-
-  - but see :doc:`security` for some important caveats to this
-
-- easy-to-use API
-- lightweight: minimal extra storage, fast ``seek()``-ing to arbitrary positions
-
-Not-yet features
-----------------
-
-- 100% test coverage (we're at 99%, so close!!)
-- hard-to-misuse
-
-  - It is currently possible, even if unlikely, to trigger nonce-reuse in the underlying primitive. There is a big warning in the :doc:`api` about this, but this doesn't really go with the definition of "hard-to-misuse". Sadly, this problem is inherent in the current API (allowing fast seeking while staying lightweight); I am planning to fix it by switching to a misuse-resistant primitive, which will have a couple of other advantages as well. (Disadvantages too, but meh... it needs to be secure first, everything else second.)
-
-Anti-features
--------------
-
-- contains crypto implemented by a non-expert
-- project will be on ice while I'm busy with Life™
-
-
-Contents
---------
+The library has a known security problem, where incorrect usage can lead to a breakdown of security and enable an adversary to recover the encryption key. The documentation warned about this problem in two places, but (in retrospect) not as prominently as I would have liked. If you used this library to encrypt sensitive data and didn't take this into account, you may contact me (see above) to receive help in determining whether this may have affected you. Ideally, you would reach out to an actually qualified person to work this out with you, but I'm not sure you would have been using this library if you had access to one.
 
 .. toctree::
-   :maxdepth: 2
-
-   tutorial
-   api
-   security
 
